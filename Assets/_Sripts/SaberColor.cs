@@ -3,6 +3,9 @@ using System.Collections;
 
 public class SaberColor : MonoBehaviour
 {
+    private float horizontalspeed = 1f;
+    private float verticalspeed = 1f;
+    private GameObject Player;
     public Material C_Yellow;
     public Material C_Blue;
     public Material C_Red;
@@ -13,6 +16,7 @@ public class SaberColor : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        Player = GameObject.FindWithTag("Player");
         if (PlayerPrefs.GetFloat("SaberColor") == 0)
         {
             GetComponent<Renderer>().material.color = C_Red.color;
@@ -47,6 +51,18 @@ public class SaberColor : MonoBehaviour
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
+        float h = horizontalspeed * Input.GetAxis("Mouse X");
+        float v = verticalspeed * Input.GetAxis("Mouse Y");
+        transform.Rotate(v, h, 0);
+    }
+    
+    void OnTriggerEnter(Collider coll)
+    {
+        if(coll.tag=="Shot")
+        {
+            Destroy(coll.gameObject);
+        }
     }
 }

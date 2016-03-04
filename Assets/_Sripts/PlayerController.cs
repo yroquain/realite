@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
-    private float movementSpeed = 3.0f;
+    private float movementSpeed = 10.0f;
     public GameObject PauseCanvas;
     //Rotation
     private float speed = 50.0f;
