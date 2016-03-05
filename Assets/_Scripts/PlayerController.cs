@@ -10,9 +10,16 @@ public class PlayerController : MonoBehaviour {
     private float rotate;
     private Quaternion qTo = Quaternion.Euler(0.0f, 0.0f, 0.0f);
 
+    //Light Saber
+    private bool IsLightsaberActive;
+    public GameObject lightsaber;
+    public GameObject lightsabersound;
+    public float waitTime;
 
     void Start()
     {
+        IsLightsaberActive = true;
+        waitTime = 0;
     }
 
     // Update is called once per frame
@@ -52,7 +59,22 @@ public class PlayerController : MonoBehaviour {
             Time.timeScale = 0;
         }
 
+        if(Input.GetKeyDown(KeyCode.E) && Time.time> waitTime+0.3f)
+        {
+            waitTime = Time.time;
+            if (IsLightsaberActive)
+            {
+                lightsabersound.GetComponent<AudioSource>().Play();
+                lightsaber.SetActive(false);
+            }
+            else if (!IsLightsaberActive)
+            {
+                GetComponent<AudioSource>().Play();
+                lightsaber.SetActive(true);
+            }
+            IsLightsaberActive = !IsLightsaberActive;
 
+        }
     }
 }
 

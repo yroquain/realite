@@ -13,9 +13,11 @@ public class SaberColor : MonoBehaviour
     public Material C_Orange;
     public Material C_Magenta;
     public GameObject Light;
+    private float audiowait;
     // Use this for initialization
     void Start ()
     {
+        audiowait = 0;
         Player = GameObject.FindWithTag("Player");
         if (PlayerPrefs.GetFloat("SaberColor") == 0)
         {
@@ -56,6 +58,11 @@ public class SaberColor : MonoBehaviour
         float h = horizontalspeed * Input.GetAxis("Mouse X");
         float v = verticalspeed * Input.GetAxis("Mouse Y");
         transform.Rotate(v, h, 0);
+        if((v > 2 || h>2 || v<-2 || h<-2) && Time.time> audiowait+1f && Time.time>Player.GetComponent<PlayerController>().waitTime+1f)
+        {
+            GetComponent<AudioSource>().Play();
+            audiowait = Time.time;
+        }
     }
     
     void OnTriggerEnter(Collider coll)

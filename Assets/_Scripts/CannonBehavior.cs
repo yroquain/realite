@@ -30,6 +30,7 @@ public class CannonBehavior : MonoBehaviour {
                 GameObject.Destroy(go, 3f);
                 lastShot = Time.time;
                 hasShot = true;
+                GetComponent<AudioSource>().Play();
             }
         }
         if (NextShoterRef.GetComponent<CannonBehavior>().hasShot)
