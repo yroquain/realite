@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
     private float movementSpeed = 10.0f;
     public GameObject PauseCanvas;
@@ -13,11 +14,28 @@ public class PlayerController : MonoBehaviour {
     //Light Saber
     private bool IsLightsaberActive;
     public GameObject lightsaber;
-    public GameObject lightsabersound;
     public float waitTime;
+    public AudioClip opensound;
+    public AudioClip closesound;
+
+    //Health
+    private int HP;
+    public GameObject[] Health;
+    public GameObject[] Health2;
+    public GameObject HealthJ;
+    public GameObject HealthS;
 
     void Start()
     {
+        if (PlayerPrefs.GetFloat("Type") == 0)
+        {
+            HealthJ.SetActive(false);
+        }
+        if (PlayerPrefs.GetFloat("Type") == 1)
+        {
+            HealthS.SetActive(false);
+        }
+        HP = 3;
         IsLightsaberActive = true;
         waitTime = 0;
     }
@@ -27,29 +45,29 @@ public class PlayerController : MonoBehaviour {
     {
         //Reset
         GetComponent<Rigidbody>().velocity = new Vector3(GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, 0); //Set X and Z velocity to 0
-        
+
         //When Moving
         if (Input.GetAxis("Vertical") != 0)
         {
-            
-                transform.Translate(0, 0, Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed);
-               
-            
+
+            transform.Translate(0, 0, Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed);
+
+
         }
-        
+
 
         //When Jumping
         if (GetComponent<Rigidbody>().velocity == new Vector3(0, 0, 0) && Input.GetKeyDown("space"))
         {
             GetComponent<Rigidbody>().AddForce(new Vector3(0, 400, 0), ForceMode.Force);
         }
-        
+
 
         //Rotating
-        if (Input.GetAxis("Horizontal") != 0 )
+        if (Input.GetAxis("Horizontal") != 0)
         {
             rotate += Input.GetAxis("Horizontal");
-            qTo = Quaternion.Euler(0.0f, rotate , 0.0f);
+            qTo = Quaternion.Euler(0.0f, rotate, 0.0f);
         }
 
         transform.rotation = Quaternion.RotateTowards(transform.rotation, qTo, Time.deltaTime * speed);
@@ -59,21 +77,40 @@ public class PlayerController : MonoBehaviour {
             Time.timeScale = 0;
         }
 
-        if(Input.GetKeyDown(KeyCode.E) && Time.time> waitTime+0.3f)
+        if (Input.GetKeyDown(KeyCode.E) && Time.time > waitTime + 0.3f)
         {
             waitTime = Time.time;
             if (IsLightsaberActive)
             {
-                lightsabersound.GetComponent<AudioSource>().Play();
+                AudioSource.PlayClipAtPoint(closesound, transform.position, 0.1f);
                 lightsaber.SetActive(false);
             }
             else if (!IsLightsaberActive)
             {
-                GetComponent<AudioSource>().Play();
+                AudioSource.PlayClipAtPoint(opensound, transform.position, 0.1f);
                 lightsaber.SetActive(true);
             }
             IsLightsaberActive = !IsLightsaberActive;
 
+        }
+    }
+    void OnCollisionEnter(Collision coll)
+    {
+        if (coll.gameObject.tag == "Shot")
+        {
+            if (HP > 0)
+            {
+                HP = HP - 1;
+                if (PlayerPrefs.GetFloat("Type") == 0)
+                {
+                    Health[HP].SetActive(false);
+                }
+                if (PlayerPrefs.GetFloat("Type") == 1)
+                {
+                    Health2[HP].SetActive(false);
+                }
+
+            }
         }
     }
 }

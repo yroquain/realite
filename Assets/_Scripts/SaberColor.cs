@@ -3,8 +3,8 @@ using System.Collections;
 
 public class SaberColor : MonoBehaviour
 {
-    private float horizontalspeed = 1f;
-    private float verticalspeed = 1f;
+    private float horizontalspeed = 2f;
+    private float verticalspeed = 2f;
     private GameObject Player;
     public Material C_Yellow;
     public Material C_Blue;
@@ -14,6 +14,8 @@ public class SaberColor : MonoBehaviour
     public Material C_Magenta;
     public GameObject Light;
     private float audiowait;
+    public AudioClip hitsound;
+    public AudioClip movesound;
     // Use this for initialization
     void Start ()
     {
@@ -57,10 +59,14 @@ public class SaberColor : MonoBehaviour
     {
         float h = horizontalspeed * Input.GetAxis("Mouse X");
         float v = verticalspeed * Input.GetAxis("Mouse Y");
-        transform.Rotate(v, h, 0);
+        v = -v;
+        if (Time.timeScale != 0)
+        {
+            transform.Rotate(v, h, 0);
+        }
         if((v > 2 || h>2 || v<-2 || h<-2) && Time.time> audiowait+1f && Time.time>Player.GetComponent<PlayerController>().waitTime+1f)
         {
-            GetComponent<AudioSource>().Play();
+            AudioSource.PlayClipAtPoint(movesound, transform.position, 0.2f);
             audiowait = Time.time;
         }
     }
@@ -69,6 +75,7 @@ public class SaberColor : MonoBehaviour
     {
         if(coll.tag=="Shot")
         {
+            AudioSource.PlayClipAtPoint(hitsound, transform.position, 0.1f);
             Destroy(coll.gameObject);
         }
     }

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour {
 
     public GameObject CanvasOption;
+    public GameObject CanvasStart;
     public Dropdown MyDrop;
     public Sprite[] SpriteListe;
     public Image LightSaberImage;
@@ -26,10 +28,20 @@ public class MainMenu : MonoBehaviour {
     }
     public void OnLevelClick()
     {
-        Application.LoadLevel(1);
+        CanvasStart.SetActive(true);
     }
     public void OnChangeValue()
     {
         LightSaberImage.GetComponent<Image>().sprite = SpriteListe[MyDrop.value];
+    }
+    public void OnJediClick()
+    {
+        PlayerPrefs.SetFloat("Type", 1);
+        SceneManager.LoadScene(1);
+    }
+    public void OnSithClick()
+    {
+        PlayerPrefs.SetFloat("Type", 0);
+        SceneManager.LoadScene(1);
     }
 }
