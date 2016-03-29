@@ -3,9 +3,10 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-
-    private float movementSpeed = 10.0f;
+    //Canvas
     public GameObject PauseCanvas;
+    public GameObject DeathCanvas;
+
     //Rotation
     private float speed = 50.0f;
     private float rotate;
@@ -25,6 +26,8 @@ public class PlayerController : MonoBehaviour
     public GameObject HealthJ;
     public GameObject HealthS;
 
+    private float movementSpeed = 10.0f;
+
     void Start()
     {
         if (PlayerPrefs.GetFloat("Type") == 0)
@@ -37,12 +40,19 @@ public class PlayerController : MonoBehaviour
         }
         HP = 3;
         IsLightsaberActive = true;
+        DeathCanvas.SetActive(false);
         waitTime = 0;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        //Death 
+        if(transform.position.y<-5)
+        {
+            DeathCanvas.SetActive(true);
+            Time.timeScale = 0;
+        }
         //Reset
         GetComponent<Rigidbody>().velocity = new Vector3(GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, 0); //Set X and Z velocity to 0
 
@@ -110,6 +120,11 @@ public class PlayerController : MonoBehaviour
                     Health2[HP].SetActive(false);
                 }
 
+            }
+            if(HP==0)
+            {
+                DeathCanvas.SetActive(true);
+                Time.timeScale = 0;
             }
         }
     }
