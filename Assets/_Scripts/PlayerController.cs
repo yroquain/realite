@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour
         #region a_supprimer_avant_build_final
 
         PlayerPrefs.SetFloat("Area1", 0);
+        PlayerPrefs.SetFloat("Area2", 0);
         PlayerPrefs.SetFloat("Key", 0);
 
         #endregion
@@ -112,6 +113,10 @@ public class PlayerController : MonoBehaviour
         if(transform.position.z> 143)
         {
             PlayerPrefs.SetFloat("Area1", 1);
+        }
+        if(transform.position.x>115)
+        {
+            PlayerPrefs.SetFloat("Area2", 1);
         }
     }
     void OnCollisionEnter(Collision coll)
