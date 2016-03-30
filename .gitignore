@@ -36,3 +36,6 @@ DijkstraFactory/Assembly-CSharp.csproj
 DijkstraFactory/Assembly-CSharp-Editor.csproj
 *.apk
 DijkstraFactory/Assembly-CSharp-firstpass.csproj
+
+Assembly-CSharp-Editor.csproj
+Assembly-CSharp.csproj

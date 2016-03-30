@@ -29,7 +29,7 @@ public class KeyTrigger : MonoBehaviour {
             if (collision.gameObject.name == "Player")
             {
                 MyText.SetActive(true);
-                if (Input.GetKeyDown(KeyCode.F))
+				if (Input.GetKeyDown(KeyCode.A) || (PlayerController.wiimote !=null && PlayerController.wiimote.Button.a))
                 {
                     if (PlayerPrefs.GetFloat("Key") < NumberKey)
                     {
@@ -49,7 +49,7 @@ public class KeyTrigger : MonoBehaviour {
             if (collision.gameObject.name == "Player")
             {
                 MyText.SetActive(true);
-                if (Input.GetKeyDown(KeyCode.F))
+				if (Input.GetKeyDown(KeyCode.A) || (PlayerController.wiimote !=null && PlayerController.wiimote.Button.a))
                 {
                     if (PlayerPrefs.GetFloat("Key") < NumberKey)
                     {

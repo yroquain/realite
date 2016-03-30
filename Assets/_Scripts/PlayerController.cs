@@ -30,11 +30,12 @@ public class PlayerController : MonoBehaviour
     private float movementSpeed = 10.0f;
 
 	//Wiimote & mouse controller
-	private Wiimote wiimote;
+	public static Wiimote wiimote =null;
 	private float horizontalspeed = 2f;
 	private float verticalspeed = 2f;
 	private float audiowait;
 	public AudioClip movesound;
+	bool motionPlusActivated = false;
 
 
 	void toggleSaber(){
@@ -54,6 +55,11 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+		WiimoteManager.FindWiimotes();
+		if (WiimoteManager.HasWiimote ()) {
+			wiimote = WiimoteManager.Wiimotes [0];
+			wiimote.RequestIdentifyWiiMotionPlus();
+		}
         #region a_supprimer_avant_build_final
 
         PlayerPrefs.SetFloat("Area1", 0);
@@ -75,6 +81,12 @@ public class PlayerController : MonoBehaviour
         waitTime = 0;
     }
 
+	void OnApplicationQuit() {
+		if (wiimote != null) {
+			WiimoteManager.Cleanup(wiimote);
+		}
+	}
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -87,13 +99,32 @@ public class PlayerController : MonoBehaviour
         //Reset
         GetComponent<Rigidbody>().velocity = new Vector3(GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, 0); //Set X and Z velocity to 0
 
+		//Wiimote 
+		if (wiimote != null) {
+			int ret = 0;
+			do
+			{
+				ret = wiimote.ReadWiimoteData();
+			} while (ret > 0);	
+			if (!motionPlusActivated && wiimote.wmp_attached) {
+				wiimote.ActivateWiiMotionPlus();
+				motionPlusActivated = true;
+			}
+			if (motionPlusActivated) {
+				Debug.Log ("Pitch " + wiimote.MotionPlus.PitchSpeed);
+				Debug.Log ("Yaw " + wiimote.MotionPlus.YawSpeed);
+				Debug.Log ("Roll " + wiimote.MotionPlus.RollSpeed);
+			} else {
+				Debug.Log ("No motion plus");
+			}
+		}
+
         //When Moving
-        if (Input.GetAxis("Vertical") != 0)
-        {
-
+		if (wiimote!=null && (wiimote.Button.d_up || wiimote.Button.d_down)){
+			transform.Translate(0, 0, (wiimote.Button.d_up ? 1:-1) * Time.deltaTime * movementSpeed);
+		}
+		else if(Input.GetAxis("Vertical") != 0){
             transform.Translate(0, 0, Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed);
-
-
         }
 
 
@@ -105,7 +136,11 @@ public class PlayerController : MonoBehaviour
 
 
         //Rotating
-        if (Input.GetAxis("Horizontal") != 0)
+		if (wiimote!=null && (wiimote.Button.d_left || wiimote.Button.d_right)){
+			rotate += (wiimote.Button.d_right ? 1 : -1);
+			qTo = Quaternion.Euler(0.0f, rotate, 0.0f);
+		}
+		else if (Input.GetAxis("Horizontal") != 0)
         {
             rotate += Input.GetAxis("Horizontal");
             qTo = Quaternion.Euler(0.0f, rotate, 0.0f);
@@ -118,7 +153,7 @@ public class PlayerController : MonoBehaviour
             Time.timeScale = 0;
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && Time.time > waitTime + 0.3f)
+		if ((Input.GetKeyDown(KeyCode.E)|| (wiimote!=null && wiimote.Button.b)) && Time.time > waitTime + 0.3f)
         {
 			toggleSaber ();
 
@@ -146,25 +181,6 @@ public class PlayerController : MonoBehaviour
         {
             PlayerPrefs.SetFloat("Area2", 1);
         }
-
-		//Wiimote 
-		if (!WiimoteManager.HasWiimote()) {
-			return;
-		}
-		wiimote = WiimoteManager.Wiimotes[0];
-
-
-		int ret = 0;
-		do
-		{
-			ret = wiimote.ReadWiimoteData();
-		} while (ret > 0);				
-
-
-		if (wiimote.Button.b && Time.time > waitTime + 0.3f)
-		{
-			toggleSaber ();
-		}
     }
     void OnCollisionEnter(Collision coll)
     {
