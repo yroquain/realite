@@ -54,22 +54,7 @@ public class SaberColor : MonoBehaviour
 
     }
 	
-	// Update is called once per frame
-	void Update ()
-    {
-        float h = horizontalspeed * Input.GetAxis("Mouse X");
-        float v = verticalspeed * Input.GetAxis("Mouse Y");
-        v = -v;
-        if (Time.timeScale != 0)
-        {
-            transform.Rotate(v, h, 0);
-        }
-        if((v > 2 || h>2 || v<-2 || h<-2) && Time.time> audiowait+1f && Time.time>Player.GetComponent<PlayerController>().waitTime+1f)
-        {
-            AudioSource.PlayClipAtPoint(movesound, transform.position, 0.2f);
-            audiowait = Time.time;
-        }
-    }
+
     
     void OnTriggerEnter(Collider coll)
     {

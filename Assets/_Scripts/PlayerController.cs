@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using WiimoteApi;
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,6 +28,29 @@ public class PlayerController : MonoBehaviour
     public GameObject HealthS;
 
     private float movementSpeed = 10.0f;
+
+	//Wiimote & mouse controller
+	private Wiimote wiimote;
+	private float horizontalspeed = 2f;
+	private float verticalspeed = 2f;
+	private float audiowait;
+	public AudioClip movesound;
+
+
+	void toggleSaber(){
+		waitTime = Time.time;
+		if (IsLightsaberActive)
+		{
+			AudioSource.PlayClipAtPoint(closesound, transform.position, 0.1f);
+			lightsaber.SetActive(false);
+		}
+		else if (!IsLightsaberActive)
+		{
+			AudioSource.PlayClipAtPoint(opensound, transform.position, 0.1f);
+			lightsaber.SetActive(true);
+		}
+		IsLightsaberActive = !IsLightsaberActive;
+	}
 
     void Start()
     {
@@ -96,20 +120,24 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E) && Time.time > waitTime + 0.3f)
         {
-            waitTime = Time.time;
-            if (IsLightsaberActive)
-            {
-                AudioSource.PlayClipAtPoint(closesound, transform.position, 0.1f);
-                lightsaber.SetActive(false);
-            }
-            else if (!IsLightsaberActive)
-            {
-                AudioSource.PlayClipAtPoint(opensound, transform.position, 0.1f);
-                lightsaber.SetActive(true);
-            }
-            IsLightsaberActive = !IsLightsaberActive;
+			toggleSaber ();
 
         }
+
+		float h = horizontalspeed * Input.GetAxis("Mouse X");
+		float v = verticalspeed * Input.GetAxis("Mouse Y");
+		v = -v;
+		if (Time.timeScale != 0)
+		{
+			lightsaber.transform.Rotate(v, h, 0);
+		}
+		if((v > 2 || h>2 || v<-2 || h<-2) && Time.time> audiowait+1f && Time.time>waitTime+1f)
+		{
+			AudioSource.PlayClipAtPoint(movesound, transform.position, 0.2f);
+			audiowait = Time.time;
+		}
+
+
         if(transform.position.z> 143)
         {
             PlayerPrefs.SetFloat("Area1", 1);
@@ -118,6 +146,25 @@ public class PlayerController : MonoBehaviour
         {
             PlayerPrefs.SetFloat("Area2", 1);
         }
+
+		//Wiimote 
+		if (!WiimoteManager.HasWiimote()) {
+			return;
+		}
+		wiimote = WiimoteManager.Wiimotes[0];
+
+
+		int ret = 0;
+		do
+		{
+			ret = wiimote.ReadWiimoteData();
+		} while (ret > 0);				
+
+
+		if (wiimote.Button.b && Time.time > waitTime + 0.3f)
+		{
+			toggleSaber ();
+		}
     }
     void OnCollisionEnter(Collision coll)
     {
