@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 	private float verticalspeed = 2f;
 	private float audiowait;
 	public AudioClip movesound;
-	bool motionPlusActivated = false;
+	float rumbling = Time.time;
 
 
 	void toggleSaber(){
@@ -108,7 +108,12 @@ public class PlayerController : MonoBehaviour
 			{
 				ret = wiimote.ReadWiimoteData();
 			} while (ret > 0);
+			if (rumbling + 0.5f < Time.time) {
+				wiimote.RumbleOn = false;
+				wiimote.SendStatusInfoRequest ();
+			}
 		}
+
 
         //When Moving
 		if (wiimote!=null && (wiimote.Button.d_up || wiimote.Button.d_down)){
@@ -188,11 +193,15 @@ public class PlayerController : MonoBehaviour
                 {
                     Health2[HP].SetActive(false);
                 }
-
+				rumbling = Time.time;
+				wiimote.RumbleOn = true;
+				wiimote.SendStatusInfoRequest();
             }
             if(HP==0)
             {
                 DeathCanvas.SetActive(true);
+				wiimote.RumbleOn = false;
+				wiimote.SendStatusInfoRequest();
                 Time.timeScale = 0;
             }
         }
