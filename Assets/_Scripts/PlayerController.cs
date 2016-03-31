@@ -55,11 +55,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-		WiimoteManager.FindWiimotes();
-		if (WiimoteManager.HasWiimote ()) {
-			wiimote = WiimoteManager.Wiimotes [0];
-			wiimote.RequestIdentifyWiiMotionPlus();
-		}
         #region a_supprimer_avant_build_final
 
         PlayerPrefs.SetFloat("Area1", 0);
@@ -76,9 +71,16 @@ public class PlayerController : MonoBehaviour
             HealthS.SetActive(false);
         }
         HP = 3;
-        IsLightsaberActive = true;
+        IsLightsaberActive = false;
         DeathCanvas.SetActive(false);
-        waitTime = 0;
+		waitTime = 0;
+
+
+		WiimoteManager.FindWiimotes();
+		if (WiimoteManager.HasWiimote ()) {
+			wiimote = WiimoteManager.Wiimotes [0];
+			wiimote.RequestIdentifyWiiMotionPlus();
+		}
     }
 
 	void OnApplicationQuit() {
@@ -105,18 +107,7 @@ public class PlayerController : MonoBehaviour
 			do
 			{
 				ret = wiimote.ReadWiimoteData();
-			} while (ret > 0);	
-			if (!motionPlusActivated && wiimote.wmp_attached) {
-				wiimote.ActivateWiiMotionPlus();
-				motionPlusActivated = true;
-			}
-			if (motionPlusActivated) {
-				Debug.Log ("Pitch " + wiimote.MotionPlus.PitchSpeed);
-				Debug.Log ("Yaw " + wiimote.MotionPlus.YawSpeed);
-				Debug.Log ("Roll " + wiimote.MotionPlus.RollSpeed);
-			} else {
-				Debug.Log ("No motion plus");
-			}
+			} while (ret > 0);
 		}
 
         //When Moving
@@ -129,7 +120,7 @@ public class PlayerController : MonoBehaviour
 
 
         //When Jumping
-        if (GetComponent<Rigidbody>().velocity == new Vector3(0, 0, 0) && Input.GetKeyDown("space"))
+		if (GetComponent<Rigidbody>().velocity == new Vector3(0, 0, 0) && (Input.GetKeyDown("space") || (wiimote!=null && wiimote.Button.b)))
         {
             GetComponent<Rigidbody>().AddForce(new Vector3(0, 400, 0), ForceMode.Force);
         }
@@ -153,7 +144,7 @@ public class PlayerController : MonoBehaviour
             Time.timeScale = 0;
         }
 
-		if ((Input.GetKeyDown(KeyCode.E)|| (wiimote!=null && wiimote.Button.b)) && Time.time > waitTime + 0.3f)
+		if ((Input.GetKeyDown(KeyCode.E)|| (wiimote!=null && wiimote.Button.one)) && Time.time > waitTime + 0.3f)
         {
 			toggleSaber ();
 
