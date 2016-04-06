@@ -35,7 +35,7 @@ public class SecondCanonBehavior : MonoBehaviour {
                     GetComponent<AudioSource>().Play();
                 }
             }
-            if (Time.time > LastShoterRef.GetComponent<SecondCanonBehavior>().lastShot  && !hasShot && gameObject.name== "Cannon (10)")
+            if (Time.time > LastShoterRef.GetComponent<SecondCanonBehavior>().lastShot  && !hasShot && (gameObject.name== "Cannon (10)" || gameObject.name== "Cannon (17)"))
             {
                 if (Player.transform.position.x > 40 && LastShoterRef.GetComponent<SecondCanonBehavior>().hasShot && PlayerPrefs.GetFloat("Key") > 0)
                 {
