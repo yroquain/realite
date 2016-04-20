@@ -20,6 +20,10 @@ public class PlayerController : MonoBehaviour
     public AudioClip opensound;
     public AudioClip closesound;
 
+	private float rotx;
+	private float roty;
+	private float rotz;
+
     //Health
     private int HP;
     public GameObject[] Health;
@@ -36,7 +40,7 @@ public class PlayerController : MonoBehaviour
 	private float verticalspeed = 2f;
 	private float audiowait;
 	public AudioClip movesound;
-	float rumbling = Time.time;
+	public Quaternion initialRotation;
 
 
 	void toggleSaber(){
@@ -63,7 +67,10 @@ public class PlayerController : MonoBehaviour
         PlayerPrefs.SetFloat("Area3", 0);
         PlayerPrefs.SetFloat("Key", 0);
 
-        #endregion
+		#endregion
+		rotx = transform.position.x + lightsaber.transform.position.x;
+		roty = transform.position.y + lightsaber.transform.position.y;
+		rotz = transform.position.z + lightsaber.transform.position.z;
         IsDead = false;
         if (PlayerPrefs.GetFloat("Type") == 0)
         {
@@ -83,12 +90,17 @@ public class PlayerController : MonoBehaviour
 		if (WiimoteManager.HasWiimote ()) {
 			wiimote = WiimoteManager.Wiimotes [0];
 			wiimote.RequestIdentifyWiiMotionPlus();
+			wiimote.SendDataReportMode(InputDataType.REPORT_BUTTONS_ACCEL);
+			wiimote.Accel.CalibrateAccel(AccelCalibrationStep.A_BUTTON_UP);
 		}
+
+		initialRotation = lightsaber.transform.localRotation;
     }
 
 	void OnApplicationQuit() {
 		if (wiimote != null) {
 			WiimoteManager.Cleanup(wiimote);
+			wiimote = null;
 		}
 	}
 
@@ -111,10 +123,6 @@ public class PlayerController : MonoBehaviour
 			{
 				ret = wiimote.ReadWiimoteData();
 			} while (ret > 0);
-			if (rumbling + 0.5f < Time.time) {
-				wiimote.RumbleOn = false;
-				wiimote.SendStatusInfoRequest ();
-			}
 		}
 
 
@@ -166,10 +174,27 @@ public class PlayerController : MonoBehaviour
             float h = horizontalspeed * Input.GetAxis("Mouse X");
             float v = verticalspeed * Input.GetAxis("Mouse Y");
             v = -v;
-            if (Time.timeScale != 0)
-            {
-                lightsaber.transform.Rotate(v, h, 0);
-            }
+			if (wiimote == null && Time.timeScale != 0) {
+				lightsaber.transform.Rotate (v, h, 0);
+			} else {
+				Vector3 accel = GetAccelVector ();
+				Debug.Log ("x" + accel.x);
+				Debug.Log ("y" + accel.y);
+				Debug.Log ("z" + accel.z);
+				accel.x = accel.x ;
+				accel.y = accel.y ;
+				accel.z = accel.z ;
+
+
+				float h1 = Mathf.Sqrt (accel.x * accel.x + accel.z * accel.z);
+				float ry = Mathf.Atan (accel.y / h1);
+				float h2 = Mathf.Sqrt (accel.x * accel.x + accel.y * accel.y);
+				float rz = Mathf.Atan (h2 / accel.z);
+				float h3 = Mathf.Sqrt (accel.y * accel.y + accel.z * accel.z);
+				float rx = Mathf.Atan (h3 / accel.x);
+
+				lightsaber.transform.localRotation = Quaternion.Euler (rx* (rotx)*45, ry* (roty)*45, rz* (rotz)*45);
+			}
             if ((v > 2 || h > 2 || v < -2 || h < -2) && Time.time > audiowait + 1f && Time.time > waitTime + 1f)
             {
                 AudioSource.PlayClipAtPoint(movesound, transform.position, 0.2f);
@@ -191,6 +216,13 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+	void OnDrawGizmos(){
+		if (wiimote != null) {
+			Gizmos.color = Color.red;
+			Gizmos.DrawLine(lightsaber.transform.position, lightsaber.transform.position + initialRotation*GetAccelVector()*2);
+		}
+	}
     void OnCollisionEnter(Collision coll)
     {
         if (coll.gameObject.tag == "Shot")
@@ -206,20 +238,32 @@ public class PlayerController : MonoBehaviour
                 {
                     Health2[HP].SetActive(false);
                 }
-				rumbling = Time.time;
-				wiimote.RumbleOn = true;
-				wiimote.SendStatusInfoRequest();
             }
             if(HP==0)
             {
                 IsDead = true;
                 DeathCanvas.SetActive(true);
-				wiimote.RumbleOn = false;
-				wiimote.SendStatusInfoRequest();
                 Time.timeScale = 0;
+				if (wiimote != null) {
+					WiimoteManager.Cleanup(wiimote);
+					wiimote = null;
+				}
             }
         }
     }
+	private Vector3 GetAccelVector()
+	{
+		float accel_x;
+		float accel_y;
+		float accel_z;
+
+		float[] accel = wiimote.Accel.GetCalibratedAccelData();
+		accel_x = accel[0];
+		accel_y = accel[1];
+		accel_z = accel[2];
+
+		return new Vector3(accel_x, accel_y, accel_z).normalized;
+	}
 }
 
 
